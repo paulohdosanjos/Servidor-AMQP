@@ -40,11 +40,11 @@ Além disso, o servidor suporta um limite limitado de clientes. Um cliente deve:
 
 ## Build e execução
 
-Para compilar o servidor, rode ```make```.
+Para compilar o servidor, rode `make`.
 
 Depois de compilado, para rodar o servidor broker, execute:
 
-    ```broker 5672```
+    `./broker 5672`
 
 O único argumento do programa é o número da porta em que o servidor vai escutar por conexões. Evidentemente, você pode escolher a porta de sua preferência. O número da porta AMQP padrão foi atribuído pela IANA como 5672 para TCP e UDP e por isso é recomendável o uso desse número de porta. A porta UDP é reservada para uso em futuras implementações multi-cast.
 
@@ -68,19 +68,7 @@ Antes dos comandos serem executados abaixo, as filas foram devidamente declarada
 Exemplo de uso do servidor com o cliente amqp-publish, que publica duas mensagens em cada fila. Perceba a ordem das mensagens em cada fila 
 
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png" alt="publish">
-</h1>
-
-Exemplo de uso do servidor com o cliente amqp-consumer, que consome duas mensagens de cada fila. Perceba a ordem em que as mensagens são enviadas para o cliente. 
-
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/consume.png" alt="declare">
-</h1>
-
-Exemplo do esquema Round Robin do servidor. No cenário abaixo, 3 clientes distintos se conectam na mesma fila. Depois, são publicadas nove mensagens, que serão consumidas pelos clientes. Observe quais mensagens são enviadas para cada cliente. 
-
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/roundrobin.png" alt="declare">
+  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png">
 </h1>
 
 ## Visão geral do funcionamento interno do servidor 
