@@ -51,13 +51,21 @@ Por padrão essas macros valem 8 e 100 respectivamente.
 
 ## Exemplo de uso 
 
-![Exemplo](declare.png)
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/declare.png" alt="Neovim">
+</h1>
 
-![Exemplo](consume.png)
+![Declarando uma fila](img/declare.png)
 
-![Exemplo](img/publish.png)
+![Publicando numa fila](img/publish.png)
 
-## 
+![Consumindo de uma fila](img/consume.png)
+
+## Visão geral do funcionamento interno do servidor 
+
+Para os mais curiosos: essa seção fornece uma breve descrição do funcionamento interno do servidor. Para mais detalhes, é recomendável ler os comentários nos arquivos fontes. De toda forma, essa seção é uma boa primeira leitura sobre a implementação.
+
+
 
 
 
