@@ -11,7 +11,7 @@ O projeto consiste na construção de um servidor simplificado que implementa o 
 
 De acordo com a página principal do RabbitMq: 
 
-"AMQP 0-9-1 (Advanced Message Queuing Protocol) é um protocolo de mensagens que permite que aplicativos clientes em conformidade se comuniquem com intermediários de middleware de mensagens em conformidade."
+"AMQP 0-9-1 (Advanced Message Queuing Protocol) é um protocolo de mensagens que permite que aplicativos clientes se comuniquem com intermediários de middleware de mensagens em conformidade."
 
 Um servidor que implementa um protocolo desse tipo é chamado de servidor *broker*. Em resumo, *brokers* recebem mensagens dos *publishers* (clientes que as publicam, também conhecidos como produtores) e as encaminham para os *consumers* (clientes que as processam).
 
