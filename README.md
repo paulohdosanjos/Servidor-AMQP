@@ -63,15 +63,17 @@ Por padrão essas macros valem 8 e 100 respectivamente.
 
 ## Exemplo de uso 
 
-Antes dos comandos serem executados abaixo, as filas foram devidamente declaradas.
+Exemplo de uso do servidor com o cliente amqp-declare-queue, que declara duas filas no servidor.
 
-Exemplo de uso do servidor com o cliente amqp-publish, que publica duas mensagens em cada fila. Perceba a ordem das mensagens em cada fila 
+![](https://github.com/paulohdosanjos/Servidor-AMQP/blob/main/img/declare.png?raw=true)
 
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png">
-</h1>
+Exemplo de uso do servidor com o cliente amqp-publish, que publica duas mensagens em cada fila. Perceba a ordem das mensagens em cada fila.
 
-![alt text](https://github.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png?raw=true)
+![](https://github.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png?raw=true)
+
+Exemplo de uso do servidor com o cliente amqp-consumer com esquema Round Robin. No cenário abaixo, 3 clientes distintos se conectam na mesma fila. Depois, são publicadas nove mensagens, que serão consumidas pelos clientes. Observe quais mensagens são enviadas para cada cliente. 
+
+![](https://github.com/paulohdosanjos/Servidor-AMQP/blob/main/img/roundrobin.png?raw=true)
 
 ## Visão geral do funcionamento interno do servidor 
 
