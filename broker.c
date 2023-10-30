@@ -26,7 +26,7 @@ void *handle_client(void* __client_thread)
 {
   client_thread* _client_thread = (client_thread*) __client_thread;
   int n;
-  printf("entrei na main da thread %lu\n", _client_thread->thread_id);
+  //printf("entrei na main da thread %lu\n", _client_thread->thread_id);
 
   _client_thread->current_state = INICIAL_STATE;
   _client_thread->server_data_mutex = &_server_data_mutex;
@@ -41,16 +41,6 @@ void *handle_client(void* __client_thread)
     //printf("ESTADO : %s\n", state_name[_client_thread->current_state]);
   }
   
-  // Trecho para depuração
-  // ****************************************************
-  pthread_mutex_lock(&_server_data_mutex);
-  printf("Filas no servidor:\n");
-  printf("num filas = %d\n", _server_data.queue_list_size);
-  for(int i = 0; i < _server_data.queue_list_size; i++)
-    print_queue(_server_data.queue_list[i]);
-  pthread_mutex_unlock(&_server_data_mutex);
-  // ****************************************************
-
   close(_client_thread->connfd);
   printf("[Uma conexão fechada]\n");
   return NULL;
@@ -91,7 +81,7 @@ int main (int argc, char **argv) {
 
     _server_data = *((server_data *) malloc(sizeof(server_data)));
     pthread_mutex_init(&_server_data_mutex, NULL);
-    printf("Estrutura de informações globais do servidor alocada com sucesso\n");
+    //printf("Estrutura de informações globais do servidor alocada com sucesso\n");
 
     printf("[Servidor no ar. Aguardando conexões na porta %s]\n",argv[1]);
     printf("[Para finalizar, pressione CTRL+c ou rode um kill ou killall]\n");

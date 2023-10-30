@@ -42,7 +42,7 @@ state transitions[NUM_STATES][MAX_TRANSITIONS] = {
   {WAIT_COMMAND}, // RCVD_CHANNEL_OPEN, 
   {RCVD_QUEUE_DECLARE, RCVD_BASIC_PUBLISH, RCVD_BASIC_CONSUME}, // WAIT_COMMAND, 
   {WAIT_CHANNEL_CLOSE}, // RCVD_QUEUE_DECLARE, 
-  {WAIT_CHANNEL_CLOSE, RCVD_CONNECTION_CLOSE}, // RCVD_BASIC_PUBLISH, 
+  {WAIT_CHANNEL_CLOSE, RCVD_CHANNEL_CLOSE}, // RCVD_BASIC_PUBLISH, 
   {SUBSCRIBED}, // RCVD_BASIC_CONSUME, 
   {CLIENT_TURN}, // SUBSCRIBED, 
   {WAIT_BASIC_ACK, SUBSCRIBED}, // CLIENT_TURN, 
@@ -53,6 +53,24 @@ state transitions[NUM_STATES][MAX_TRANSITIONS] = {
   {FINAL}, // RCVD_CONNECTION_CLOSE
   {FINAL}  // FINAL
 };
+
+// Imprime na saída padrão uma mensagem de depuração, mostrando o estado atual da lista de filas e das filas de clientes de cada lista
+
+void debug (client_thread* data, server_data* _server_data)
+{
+  pthread_mutex_lock(data->server_data_mutex);
+  printf("Filas no servidor:\n");
+  for(int i = 0; i < _server_data->queue_list_size; i++)
+    print_queue(_server_data->queue_list[i]);
+
+  // Listas de clientes
+  for(int i = 0; i < _server_data->queue_list_size; i++)
+  {
+    printf("lista de clientes da fila %s\n", _server_data->queue_list[i]->name);
+    print_queue(_server_data->client_queue[i]);
+  }
+  pthread_mutex_unlock(data->server_data_mutex);
+}
 
 // Mapeamento estado (um inteiro) para nome do estado. Usado para fins de depuração
 char* state_name[NUM_STATES] = {
@@ -134,7 +152,7 @@ int do_WAIT_TUNE_OK (client_thread* data, server_data* _server_data)
   int count = 0; // Quantos frames amqp foram enviados pelo cliente ?
   for(int i = 0; i < bytes_read; i++) if(data->buf[i] == FRAME_END) count++; 
 
-  if(count == 2) 
+  //if(count == 2) 
     printf("Connection.Open recebido\n");
 
   return count - 1;
@@ -357,6 +375,8 @@ int do_RCVD_BASIC_CONSUME (client_thread* data, server_data* _server_data)
 
   printf("Basic.Consume-Ok enviado\n");
 
+  debug(data, _server_data);
+
   return 0; 
 }
 
@@ -376,7 +396,7 @@ int do_SUBSCRIBED(client_thread *data, server_data* _server_data)
     first_queue(q_client, next_client_to_consume);
     pthread_mutex_unlock(data->server_data_mutex);
 
-    //printf("o próximo cliente a consumir nessa fila é : %s\n", buf);
+    //printf("o próximo cliente a consumir nessa fila é : %s\n", next_client_to_consume);
     char client_consumer_tag[MAX_MSG_SIZE];
     memset(client_consumer_tag, 0, MAX_MSG_SIZE);
     sprintf(client_consumer_tag, "%lu", data->thread_id);
@@ -424,6 +444,8 @@ int do_CLIENT_TURN(client_thread *data, server_data* _server_data)
   dequeue_queue(q_client, buf);
   enqueue_queue(q_client, client_consumer_tag);
   pthread_mutex_unlock(data->server_data_mutex);
+
+  debug(data, _server_data);
 
   return 0;
 }
