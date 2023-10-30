@@ -67,7 +67,7 @@ Antes dos comandos serem executados abaixo, as filas foram devidamente declarada
 
 Exemplo de uso do servidor com o cliente amqp-publish, que publica duas mensagens em cada fila. Perceba a ordem das mensagens em cada fila 
 
-<h1 align="center">
+</h1 align="center">
   <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png">
 </h1>
 
