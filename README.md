@@ -63,11 +63,7 @@ Por padrão essas macros valem 8 e 100 respectivamente.
 
 ## Exemplo de uso 
 
-Exemplo de uso do servidor com o cliente amqp-declare-queue, que declara duas filas no servidor.
-
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/declare.png" alt="declare">
-</h1>
+Antes dos comandos serem executados abaixo, as filas foram devidamente declaradas.
 
 Exemplo de uso do servidor com o cliente amqp-publish, que publica duas mensagens em cada fila. Perceba a ordem das mensagens em cada fila 
 
