@@ -56,7 +56,7 @@ state transitions[NUM_STATES][MAX_TRANSITIONS] = {
 
 // Imprime na saída padrão uma mensagem de depuração, mostrando o estado atual da lista de filas e das filas de clientes de cada lista
 
-void debug (client_thread* data, server_data* _server_data)
+void print_debug_message (client_thread* data, server_data* _server_data)
 {
   pthread_mutex_lock(data->server_data_mutex);
   printf("Filas no servidor:\n");
@@ -103,7 +103,7 @@ int do_WAIT_HEADER (client_thread* data, server_data* _server_data)
 {
   read_protocol_header(data->connfd, data->buf);
 
-  printf("Protocol Header recebido\n");
+  PRINT("Protocol Header recebido\n");
 
   return 0;
 }
@@ -114,7 +114,7 @@ int do_RCVD_HEADER (client_thread* data, server_data* _server_data)
 {
     write(data->connfd, CONNECTION_START_FRAME, CONNECTION_START_FRAME_SIZE);
 
-    printf("Connection.Start enviado\n");
+    PRINT("Connection.Start enviado\n");
 
     return 0;
 }
@@ -125,7 +125,7 @@ int do_WAIT_START_OK (client_thread* data, server_data* _server_data)
 {
   read_frame(data->connfd, data->buf);
 
-  printf("Connection.Start-Ok recebido\n");
+  PRINT("Connection.Start-Ok recebido\n");
   return 0;
 }
 
@@ -135,7 +135,7 @@ int do_RCVD_START_OK (client_thread* data, server_data* _server_data)
 {
   write(data->connfd, CONNECTION_TUNE_FRAME, CONNECTION_TUNE_FRAME_SIZE);
 
-  printf("Connection.Tune enviado\n");
+  PRINT("Connection.Tune enviado\n");
 
   return 0;
 }
@@ -147,13 +147,13 @@ int do_WAIT_TUNE_OK (client_thread* data, server_data* _server_data)
 
   int bytes_read = read_frame(data->connfd, data->buf);
 
-  printf("Connection.Tune-Ok recebido\n");
+  PRINT("Connection.Tune-Ok recebido\n");
 
   int count = 0; // Quantos frames amqp foram enviados pelo cliente ?
   for(int i = 0; i < bytes_read; i++) if(data->buf[i] == FRAME_END) count++; 
 
-  //if(count == 2) 
-    printf("Connection.Open recebido\n");
+  if(count == 2) 
+    PRINT("Connection.Open recebido\n");
 
   return count - 1;
 }
@@ -164,6 +164,8 @@ int do_WAIT_CONNECTION_OPEN (client_thread* data, server_data* _server_data)
 {
   int bytes_read = read_frame(data->connfd, data->buf);
 
+  PRINT("Connection.Open enviado\n");
+
   return 0;
 }
 
@@ -173,7 +175,7 @@ int do_RCVD_CONNECTION_OPEN (client_thread* data, server_data* _server_data)
 {
   write(data->connfd, CONNECTION_OPEN_OK_FRAME, CONNECTION_OPEN_OK_FRAME_SIZE);
 
-  printf("Connection.Open-Ok enviado\n");
+  PRINT("Connection.Open-Ok enviado\n");
 
   return 0;
 }
@@ -184,7 +186,7 @@ int do_WAIT_CHANNEL_OPEN (client_thread* data, server_data* _server_data)
 {
   int bytes_read = read_frame(data->connfd, data->buf);
 
-  printf("Channel.Open recebido\n");
+  PRINT("Channel.Open recebido\n");
 
   return 0;
 }
@@ -195,7 +197,7 @@ int do_RCVD_CHANNEL_OPEN (client_thread* data, server_data* _server_data)
 {
   write(data->connfd, CHANNEL_OPEN_OK_FRAME, CHANNEL_OPEN_OK_FRAME_SIZE);
 
-  printf("Channel.Open-Ok enviado\n");
+  PRINT("Channel.Open-Ok enviado\n");
 
   return 0;
 }
@@ -213,17 +215,17 @@ int do_WAIT_COMMAND (client_thread* data, server_data* _server_data)
   switch (method_id) 
   {
     case DECLARE_ID:
-      printf("Queue.Declare recebido\n");
+      PRINT("Queue.Declare recebido\n");
       return 0;
       break;
 
     case PUBLISH_ID:
-      printf("Basic.Publish recebido\n");
+      PRINT("Basic.Publish recebido\n");
       return 1;
       break;
 
     case CONSUME_ID:
-      printf("Basic.Consume recebido\n");
+      PRINT("Basic.Consume recebido\n");
       return 2;
       break;
 
@@ -255,8 +257,6 @@ int do_RCVD_QUEUE_DECLARE (client_thread* data, server_data* _server_data)
     queue* q = create_queue(queue_name); // Aloca nova fila vazia com nome queue_name
     _server_data->queue_list_size++;
     _server_data->queue_list[_server_data->queue_list_size-1] = q;
-
-    printf("nova fila criada, número de filas = %d\n", _server_data->queue_list_size);
   }
   pthread_mutex_unlock(data->server_data_mutex);
   
@@ -265,7 +265,7 @@ int do_RCVD_QUEUE_DECLARE (client_thread* data, server_data* _server_data)
   int n = queue_declare_ok(data->buf, queue_name);
   write(data->connfd, data->buf, n);
 
-  printf("Queue.Declare-Ok enviado\n");
+  PRINT("Queue.Declare-Ok enviado\n");
 
   return 0;
 }
@@ -283,7 +283,7 @@ int do_RCVD_BASIC_PUBLISH (client_thread* data, server_data* _server_data)
   memcpy(queue_name, data->buf + ROUTING_KEY_SIZE_POSITION + 1, queue_name_size);
   queue_name[queue_name_size] = 0;
 
-  printf("nome da fila extraído : ");
+  PRINT("nome da fila extraído : ");
   puts(queue_name);
 
   // Extrai mensagem
@@ -317,7 +317,9 @@ int do_RCVD_BASIC_PUBLISH (client_thread* data, server_data* _server_data)
 
   enqueue_queue(_server_data->queue_list[i], msg); // Empilha mensagem
 
-  printf("Mensagem publicada na fila %s\n", _server_data->queue_list[i]->name);
+  PRINT("Mensagem publicada na fila");
+  PRINT(_server_data->queue_list[i]->name);
+  PRINT("\n");
   pthread_mutex_unlock(data->server_data_mutex);
 
   // Agora, vamos verificar se o Channel.Close foi lido junto no socket. Supomos que o Basic.Publish veio em 3 frames, confome descrito em cima da assinatura dessa função
@@ -339,7 +341,7 @@ int do_RCVD_BASIC_CONSUME (client_thread* data, server_data* _server_data)
   memcpy(queue_name, data->buf + QUEUE_NAME_LENGTH_OFFSET + 1, queue_name_size);
   queue_name[queue_name_size] = 0;
 
-  printf("Nome da fila extraído : ");
+  PRINT("Nome da fila extraído : ");
   puts(queue_name);
 
   // Inscreve cliente nessa fila. Primeiramente, acha índice dessa fila na lista de filas do servidor. Não verifica se o cliente já está inscrito na fila. Se um cliente for conectado mais de uma vez na mesma fila, o efeito é que ele receberá mais um "quanta" no round robin, e ele poderá receber duas mensagens na sua vez de consumir. Entretanto, esse comportamento não é o comportamento padrão de um servidor AMQP, portanto, isso não deve ser feito pelo cliente utilizando esse servidor simplificado.
@@ -354,17 +356,21 @@ int do_RCVD_BASIC_CONSUME (client_thread* data, server_data* _server_data)
   if(_server_data->client_queue[i] == NULL) // Ainda não foi criada a lista de clientes dessa fila. Primeiro cliente conectado
   {
     _server_data->client_queue[i] = create_queue("foo");
-    printf("não tinha ninguém inscrito nessa fila ainda, fila de clientes alocada\n");
+    PRINT("não tinha ninguém inscrito nessa fila ainda, fila de clientes alocada\n");
   }
 
   char consumer_tag[MAX_CONSUMER_TAG_SIZE];
   sprintf(consumer_tag, "%lu", data->thread_id); // A consumer tag do cliente vai ser o id da thread que gerencia a conexão
 
-  printf("a consumer_tag desse cliente é %s\n", consumer_tag);
+  PRINT("a consumer_tag desse cliente é ");
+  PRINT(consumer_tag);
+  PRINT("\n");
 
   enqueue_queue(_server_data->client_queue[i], consumer_tag);
 
-  printf("cliente inscrito na fila %d de nome %s\n", i, _server_data->queue_list[i]->name);
+  PRINT("cliente inscrito na fila de nome");
+  PRINT(_server_data->queue_list[i]->name);
+  PRINT("\n");
   pthread_mutex_unlock(data->server_data_mutex);
 
   // Envia o Basic.Consume-Ok
@@ -373,9 +379,9 @@ int do_RCVD_BASIC_CONSUME (client_thread* data, server_data* _server_data)
   n = basic_consume_ok(data->buf, consumer_tag);
   write(data->connfd, data->buf, n);
 
-  printf("Basic.Consume-Ok enviado\n");
+  PRINT("Basic.Consume-Ok enviado\n");
 
-  debug(data, _server_data);
+  DEBUG();
 
   return 0; 
 }
@@ -388,7 +394,6 @@ int do_SUBSCRIBED(client_thread *data, server_data* _server_data)
   {
     pthread_mutex_lock(data->server_data_mutex);
     queue* q = _server_data->queue_list[data->client_queue];
-    //printf("fila que esse cliente está inscrito : %s\n", q->name);
 
     char next_client_to_consume[MAX_MSG_SIZE]; // Consumer tag do próximo cliente a consumir na fila q
     memset(next_client_to_consume, 0, MAX_MSG_SIZE);
@@ -396,13 +401,11 @@ int do_SUBSCRIBED(client_thread *data, server_data* _server_data)
     first_queue(q_client, next_client_to_consume);
     pthread_mutex_unlock(data->server_data_mutex);
 
-    //printf("o próximo cliente a consumir nessa fila é : %s\n", next_client_to_consume);
     char client_consumer_tag[MAX_MSG_SIZE];
     memset(client_consumer_tag, 0, MAX_MSG_SIZE);
     sprintf(client_consumer_tag, "%lu", data->thread_id);
     if(strcmp(next_client_to_consume, client_consumer_tag) == 0) // Vez do cliente :)
     {
-      //printf("é sua vez :)\n");
       break;
     }
   }
@@ -436,7 +439,7 @@ int do_CLIENT_TURN(client_thread *data, server_data* _server_data)
   int n = basic_deliver(data->buf, (unsigned char*) msg, strlen(msg), client_consumer_tag, q->name);
   write(data->connfd, data->buf, n);
 
-  printf("Basic.Deliver enviado\n");
+  PRINT("Basic.Deliver enviado\n");
 
   // Faz o round robin da fila. Basicamente, desempilha e empilha o cliente na fila de clientes da lista.
   queue* q_client = _server_data->client_queue[data->client_queue]; // Fila de clientes da fila que o cliente está inscrito
@@ -445,7 +448,7 @@ int do_CLIENT_TURN(client_thread *data, server_data* _server_data)
   enqueue_queue(q_client, client_consumer_tag);
   pthread_mutex_unlock(data->server_data_mutex);
 
-  debug(data, _server_data);
+  DEBUG();
 
   return 0;
 }
@@ -455,7 +458,7 @@ int do_WAIT_BASIC_ACK (client_thread* data, server_data* _server_data)
 {
   int bytes_read = read_frame(data->connfd, data->buf);
 
-  printf("Basic.Ack recebido\n");
+  PRINT("Basic.Ack recebido\n");
 
   return 0;
 }
@@ -465,7 +468,7 @@ int do_WAIT_CHANNEL_CLOSE (client_thread* data, server_data* _server_data)
 {
   int bytes_read = read_frame(data->connfd, data->buf);
 
-  printf("Channel.Close recebido\n");
+  PRINT("Channel.Close recebido\n");
 
   return 0;
 }
@@ -475,7 +478,7 @@ int do_RCVD_CHANNEL_CLOSE (client_thread* data, server_data* _server_data)
 {
   write(data->connfd, CHANNEL_CLOSE_OK_FRAME, CHANNEL_CLOSE_OK_FRAME_SIZE);
 
-  printf("Channel.Close-Ok enviado\n");
+  PRINT("Channel.Close-Ok enviado\n");
 
   return 0;
 }
@@ -485,7 +488,7 @@ int do_WAIT_CONNECTION_CLOSE (client_thread* data, server_data* _server_data)
 {
   int bytes_read = read_frame(data->connfd, data->buf);
   
-  printf("Connection.Close recebido\n");
+  PRINT("Connection.Close recebido\n");
 
   return 0;
 }
@@ -495,7 +498,7 @@ int do_RCVD_CONNECTION_CLOSE (client_thread* data, server_data* _server_data)
 {
   write(data->connfd, CONNECTION_CLOSE_OK_FRAME, CONNECTION_CLOSE_OK_FRAME_SIZE);
 
-  printf("Connection.Close-Ok enviado\n");
+  PRINT("Connection.Close-Ok enviado\n");
 
   return 0;
 }

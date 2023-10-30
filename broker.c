@@ -17,8 +17,8 @@
 #include "utils.h"
 #include "hardcoded.h"
 
-server_data _server_data; // Informações globais do servidor compartilhadas por todas as threads 
-pthread_mutex_t _server_data_mutex; // Mutex para controlar acesso às informações globais do servidor. Toda thread que acessa a estrutura _server_data obtém o esse mutex antes.
+server_data _server_data; 
+pthread_mutex_t _server_data_mutex; 
 
 // Para cada novo cliente conectado é criada uma thread para cuidar da conexão. Cada thread executa essa função.
 
@@ -26,7 +26,6 @@ void *handle_client(void* __client_thread)
 {
   client_thread* _client_thread = (client_thread*) __client_thread;
   int n;
-  //printf("entrei na main da thread %lu\n", _client_thread->thread_id);
 
   _client_thread->current_state = INICIAL_STATE;
   _client_thread->server_data_mutex = &_server_data_mutex;
@@ -36,9 +35,7 @@ void *handle_client(void* __client_thread)
   while(_client_thread->current_state != FINAL)
   {
     n = (*actions[_client_thread->current_state])(_client_thread, &_server_data);
-    //printf("CODE : %d\n", n);
     _client_thread->current_state = transitions[_client_thread->current_state][n];
-    //printf("ESTADO : %s\n", state_name[_client_thread->current_state]);
   }
   
   close(_client_thread->connfd);
@@ -66,8 +63,8 @@ int main (int argc, char **argv) {
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port        = htons(atoi(argv[1]));
 
-    int option = 1;
-    setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)); // Para não precisar esperar o TIME_WAIT
+    //int option = 1;
+    //setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)); // Para não precisar esperar o TIME_WAIT
 
     if (bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
         perror("bind :(\n");

@@ -3,11 +3,26 @@
 #ifndef SERVER_CONFIG_H
 #define SERVER_CONFIG_H
 
+// Macros de configuração do servidor. Ajuste-as ao seu dispor.
+
+// ********************************************************************************************************************
+
+#define MAX_NUM_QUEUE 8 // Número máximo de filas que podem ser declaradas, de acordo com o requisito escrito no fórum
+
+#define MAX_CLIENTS 100 // Número máximo de clientes conectados a qualquer instante
+
+#define DEBUG_MODE 0 // Algumas mensagens de depuração são impressas na saída padrão
+
+// ********************************************************************************************************************
+
+// Macros de funcionamento interno do servidor. Não as modifique.
+
+// ********************************************************************************************************************
+
 #define MAX_FRAME_SIZE 100000 // Tamanho máximo em bytes dos frames servidor/cliente 
 #define MAX_CONSUMER_TAG_SIZE 100 // Tamnho máximo em bytes da consumer_tag de um cliente
 #define PROTOCOL_HEADER_SIZE 8
 #define FRAME_END 0xce 
-#define MAX_NUM_QUEUE 8 // Número máximo de filas que podem ser declaradas, de acordo com o requisito escrito no fórum
 
 #define TRUE 1
 #define FALSE 0
@@ -21,7 +36,17 @@
 #define PUBLISH_ID 40
 #define CONSUME_ID 20
 
-#define MAX_CLIENTS 100 // Número máximo de clientes conectados a qualquer instante
+#if DEBUG_MODE
+#define DEBUG()  print_debug_message(data, _server_data)
+#define PRINT(x) printf("%s", x)
+#else
+#define DEBUG() 
+#define PRINT(x) 
+#endif
+
+
+// ********************************************************************************************************************
+
 
 #include <pthread.h>
 

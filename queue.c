@@ -79,6 +79,14 @@ void remove_queue(queue* q)
 
 void print_queue(queue* q)
 {
+  // Fila não alocada
+  if(q == NULL)
+  {
+    printf("***************\n");
+    printf("***************\n");
+    return;
+  }
+
   printf("***************\n");
   printf("%s (%d) :\n", q->name, q->size);
   node* x = q->first;
