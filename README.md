@@ -29,6 +29,15 @@ Abaixo descrevo requisitos (na verdade são condições suficientes para executa
 
     - Suporte a threads (```pthread```)
 
+Além disso, o servidor suporta um limite limitado de clientes. Um cliente deve:
+
+    - Não mandar mensagens de exchange. Nesse servidor não existe o conceito de exchange. Fazendo um paralelo com o RabbitMQ, o servido implementa apenas o exchange *default*
+
+    - Enviar comando de publish com a opção -b. Ou seja, um cliente *publisher* manda uma mensagem por vez apenas.
+
+    - Não utilizar qualquer tipo de criptografia
+
+
 ## Build e execução
 
 Para compilar o servidor, rode ```make```.
@@ -47,19 +56,36 @@ Algumas configurações do servidor podem ser configuradas em tempo de compilaç
 
     - MAX_CLIENTS : Número máximo de clientes conectados a qualquer instante no servidor
 
+    - DEBUG_MODE : Algumas mensagens de log são impressa na saída padrão
+
 Por padrão essas macros valem 8 e 100 respectivamente.
+
 
 ## Exemplo de uso 
 
+Exemplo de uso do servidor com o cliente amqp-declare-queue, que declara duas filas no servidor.
+
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/declare.png" alt="Neovim">
+  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/declare.png" alt="declare">
 </h1>
 
-![Declarando uma fila](img/declare.png)
+Exemplo de uso do servidor com o cliente amqp-publish, que publica duas mensagens em cada fila. Perceba a ordem das mensagens em cada fila 
 
-![Publicando numa fila](img/publish.png)
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png" alt="publish">
+</h1>
 
-![Consumindo de uma fila](img/consume.png)
+Exemplo de uso do servidor com o cliente amqp-consumer, que consome duas mensagens de cada fila. Perceba a ordem em que as mensagens são enviadas para o cliente. 
+
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/consume.png" alt="declare">
+</h1>
+
+Exemplo do esquema Round Robin do servidor. No cenário abaixo, 3 clientes distintos se conectam na mesma fila. Depois, são publicadas nove mensagens, que serão consumidas pelos clientes. Observe quais mensagens são enviadas para cada cliente. 
+
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/roundrobin.png" alt="declare">
+</h1>
 
 ## Visão geral do funcionamento interno do servidor 
 
