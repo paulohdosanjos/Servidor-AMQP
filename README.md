@@ -15,25 +15,25 @@ De acordo com a página principal do RabbitMq:
 
 Um servidor que implementa um protocolo desse tipo é chamado de servidor *broker*. Em resumo, *brokers* recebem mensagens dos *publishers* (clientes que as publicam, também conhecidos como produtores) e as encaminham para os *consumers* (clientes que as processam).
 
-Por se tratar de um protocolo de rede, os *publishers*, os *consumers* e o broker podem residir em máquinas diferentes. Para uma visão geral de como o protocolo funcionar, veja a página https://www.rabbitmq.com/tutorials/amqp-concepts.html#overview e o arquivo slides.pdf.
+Por se tratar de um protocolo de rede, os *publishers*, os *consumers* e o *broker* podem residir em máquinas diferentes. Para uma visão geral de como o protocolo funciona, veja a página https://www.rabbitmq.com/tutorials/amqp-concepts.html#overview.
 
 Nesse projeto, implementei uma versão simplificada do servidor RabbitMQ, que somente precisa aceitar conexões e desconexões de clientes, receber e enviar mensagens em uma fila especı́fica sem se preocupar com falhas e sem se preocupar com autenticação ou criptografia. Além disso, de forma parecida com o comportamento do servidor RabbitMQ, o broker implementado envia mensagens aos consumidores em um esquema Round Robin (https://www.rabbitmq.com/tutorials/tutorial-two-python.html). Foram utilizados os utilitários amqp-declare-queue, amqp-publish e amqp-consume do pacote amqp-tools para os testes e correção do servidor.
 
 ## Requisitos para executar o servidor
 
-Abaixo descrevo requisitos (na verdade são condições suficientes para executar o projeto, visto que essas foram as condições no ambiente de testes) precisa se certificar que possui: 
+Abaixo descrevo requisitos (na verdade são condições suficientes para executar o projeto, visto que essas foram as condições no ambiente de testes) que a maquina host deve atender para executar o servidor *broker*: 
 
     - Uma maquina x86_64 rodando GNU/Linux (só foi testado para esse sistema)
 
     - Um compilador GCC
 
-    - Suporte a threads (```pthread```)
+    - Suporte a threads (`pthread`)
 
-Além disso, o servidor suporta um limite limitado de clientes. Um cliente deve:
+Além disso, o servidor suporta um conjunto limitado de clientes. Um cliente deve:
 
-    - Não mandar mensagens de exchange. Nesse servidor não existe o conceito de exchange. Fazendo um paralelo com o RabbitMQ, o servido implementa apenas o exchange *default*
+    - Não mandar mensagens de *exchange*. Nesse servidor não existe o conceito de *exchange*. Fazendo um paralelo com o RabbitMQ, o servidor implementa apenas o exchange *default*
 
-    - Enviar comando de publish com a opção -b. Ou seja, um cliente *publisher* manda uma mensagem por vez apenas.
+    - Enviar comando de publish com a opção -b.
 
     - Não utilizar qualquer tipo de criptografia
 
@@ -50,7 +50,7 @@ O único argumento do programa é o número da porta em que o servidor vai escut
 
 ## Configurações do servidor
 
-Algumas configurações do servidor podem ser configuradas em tempo de compilação. O arquivo server_config.h define algumas macros que podem ser ajustadas. Por enquanto, o servidor suporta a configuração de duas opções conforme descrito nesse arquivo.
+Algumas configurações do servidor podem ser definidas em tempo de compilação. O arquivo server_config.h define algumas macros que podem ser ajustadas. Por enquanto, o servidor suporta a configuração de três opções conforme descrito nesse arquivo.
 
     - MAX_NUM_QUEUE : Número máximo de filas que podem viver na memória em um dado instante 
 
@@ -58,12 +58,14 @@ Algumas configurações do servidor podem ser configuradas em tempo de compilaç
 
     - DEBUG_MODE : Algumas mensagens de log são impressas na saída padrão
 
-Por padrão essas macros valem 8 e 100 respectivamente.
+Por padrão essas macros valem 8, 100 e 0 respectivamente.
 
 
 ## Exemplo de uso 
 
-Exemplo de uso do servidor com o cliente amqp-declare-queue, que declara três filas no servidor.
+Veja abaixo alguns exemplos de uso do servidor em conjunto com os utilitários do amqp-tools citados anteriormente.
+
+Exemplo de uso do servidor com o cliente amqp-declare-queue, que declara três filas no servidor. Servidor executando à esquerda.
 
 ![](https://github.com/paulohdosanjos/Servidor-AMQP/blob/main/img/declare.png?raw=true)
 
@@ -85,7 +87,7 @@ Cada gerir cada conexão de cada cliente, são criadas threads que simulam uma m
 
 ![](https://github.com/paulohdosanjos/Servidor-AMQP/blob/main/img/diagrama.png?raw=true)
 
-Conforme dito, essa é somente uma simplificação da maquina de estados: cada estado do diagrama acima representa, na verdade, um conjunto maior de estados que gerenciam passos intermediários. 
+Essa é somente uma simplificação da maquina de estados: cada estado do diagrama acima representa, na verdade, um conjunto maior de estados que gerenciam passos intermediários. 
 
 Para cada estado, há uma função que determina a ação do servidor nesse estado. Além disso, cada função retorna um código, que sinaliza o que aconteceu qando o servidor executou a ação do estado. Esse código sinaliza uma transição de estado: dado um estado e um código de retorno, é possível determinar para qual estado a máquina de estados do servidor vai transitar, isso é feito por um simples mapeamento estático. 
 
@@ -93,7 +95,7 @@ Agora que você entendeu como funciona de forma geral o gerenciamento dos estado
 
 ### Filas e Round Robin
 
-Para implementar o esquema de Round Robin nas filas de mensagens, utilizamos... uma fila de mensagens. Mais especificamente, para cada fila declarada, mantemos uma fila de clientes que estão conectados nessa fila. Para implementar o Round Robin, basta desempilhar e empilhar o cliente que recebeu a última mensagem da fila. 
+Para implementar o esquema de Round Robin nas filas de mensagens, utilizamos... uma fila de mensagens. Mais especificamente, para cada fila declarada, mantemos uma fila de clientes que estão conectados nessa fila. Os elementos dessas filas são empacotados em mensagens com o nome de cada cliente (thread) Para implementar o Round Robin, basta desempilhar e empilhar o cliente que recebeu a última mensagem da fila. 
 
 
 
