@@ -71,7 +71,7 @@ Exemplo de uso do servidor com o cliente amqp-publish, que publica duas mensagen
   <img src="https://raw.githubusercontent.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png">
 </h1>
 
-![alt text](https://github.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.jpg?raw=true)
+![alt text](https://github.com/paulohdosanjos/Servidor-AMQP/blob/main/img/publish.png?raw=true)
 
 ## Visão geral do funcionamento interno do servidor 
 
